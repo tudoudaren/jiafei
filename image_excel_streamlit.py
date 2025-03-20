@@ -1,5 +1,3 @@
-import requests
-from tempfile import NamedTemporaryFile
 import streamlit as st
 from PIL import Image
 import openpyxl
@@ -231,7 +229,7 @@ def add_statistics(ws, width, color_stats, preset_colors):
     start_col = width + 5
 
     # 统计表头
-    ws.cell(row=1, column=start_col, value="积木编号")
+    ws.cell(row=1, column=start_col, value="“加飞积木”编号")
     ws.cell(row=1, column=start_col + 1, value="数量")
 
     # 添加统计数据
@@ -251,48 +249,26 @@ def add_statistics(ws, width, color_stats, preset_colors):
         # 数量单元格
         ws.cell(row=row, column=start_col + 1, value=count)
 
-        # 修改后的二维码插入代码
-try:
-    from openpyxl.drawing.image import Image as xlImage
+        # 添加二维码（新增部分）
+        try:
+            from openpyxl.drawing.image import Image as xlImage
+            import requests
+            from io import BytesIO
 
-    # 构建GitHub图片URL（假设图片在main分支的根目录）
-    github_url = "https://github.com/tudoudaren/jiafei/blob/main/taobao_qr.jpg"
-    
-    # 下载图片到临时文件
-    with NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_file:
-        response = requests.get(github_url, timeout=10)
-        response.raise_for_status()  # 检查HTTP错误
-        tmp_file.write(response.content)
-        tmp_path = tmp_file.name
+            # 修改此行（原qr_img = xlImage('taobao_qr.jpg')）
+            # 使用GitHub raw地址直接加载图片
+            response = requests.get("https://raw.githubusercontent.com/tudoudaren/jiafei/main/taobao_qr.jpg")
+            qr_img = xlImage(BytesIO(response.content))  # 直接读取字节流
 
-    # 加载图片并调整尺寸
-    qr_img = xlImage(tmp_path)
-    qr_img.width = 150
-    qr_img.height = 150
+            # 以下代码保持完全不变
+            qr_img.width = 150
+            qr_img.height = 150
+            anchor_cell = f"{get_column_letter(start_col + 3)}2"
+            ws[f"{get_column_letter(start_col + 3)}1"] = "扫码淘宝店铺，或小红书关注“加飞积木”，可定制或批量采购"
+            ws.add_image(qr_img, anchor_cell)
 
-    # 定位到统计表右侧
-    anchor_col = get_column_letter(start_col + 3)
-    
-    # 添加文字到第一行
-    ws[f"{anchor_col}1"] = "淘宝店铺扫码"
-    ws[f"{anchor_col}1"].font = Font(bold=True, color="FF4500")
-    
-    # 插入图片到第二行
-    ws.add_image(qr_img, f"{anchor_col}2")
-    
-    # 设置行高确保显示
-    ws.row_dimensions[2].height = 120  # 调整第二行高度
-
-except requests.exceptions.RequestException as e:
-    st.error(f"二维码下载失败: {str(e)}")
-    print(f"网络请求异常: {str(e)}")
-except Exception as e:
-    st.error(f"二维码插入失败: {str(e)}")
-    print(f"二维码处理异常: {str(e)}")
-finally:
-    # 清理临时文件
-    if 'tmp_path' in locals() and os.path.exists(tmp_path):
-        os.remove(tmp_path)
+        except Exception as e:
+            print(f"二维码插入失败: {str(e)}")
 # ========================
 # Streamlit界面
 # ========================
@@ -311,9 +287,9 @@ def main():
     with col2:
         qr_image = Image.open("taobao_qr.jpg")  # 确保图片文件在项目目录下
         st.image(qr_image,
-                caption="扫码淘宝店铺，或小红书关注“加飞积木”，可定制或批量采购",
-                width=200,
-                use_container_width=False)  # 已更新参数
+                 caption="扫码关注“加飞积木”淘宝店铺，可定制或批量采购",
+                 width=200,
+                 use_container_width=False)  # 已更新参数
 
     st.markdown("---")
 
