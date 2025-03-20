@@ -262,7 +262,7 @@ def add_statistics(ws, width, color_stats, preset_colors):
             anchor_cell = f"{get_column_letter(start_col + 3)}2"  # 行号从1改为2
 
             # 先添加文字到第一行（原第二行改为第一行）
-            ws[f"{get_column_letter(start_col + 3)}1"] = "淘宝店铺扫码"  # 行号2→1
+            ws[f"{get_column_letter(start_col + 3)}1"] = "扫码淘宝店铺，或关注小红书“加飞积木”可批量采购或定制"  # 行号2→1
 
             # 再插入图片到第二行
             ws.add_image(qr_img, anchor_cell)
