@@ -1,3 +1,5 @@
+import requests
+from tempfile import NamedTemporaryFile
 import streamlit as st
 from PIL import Image
 import openpyxl
@@ -249,26 +251,48 @@ def add_statistics(ws, width, color_stats, preset_colors):
         # 数量单元格
         ws.cell(row=row, column=start_col + 1, value=count)
 
-        # 添加二维码（新增部分）
-        try:
-            from openpyxl.drawing.image import Image as xlImage
-            qr_img = xlImage('taobao_qr.jpg')
+        # 修改后的二维码插入代码
+try:
+    from openpyxl.drawing.image import Image as xlImage
 
-            # 调整二维码尺寸（保持原参数不变）
-            qr_img.width = 150
-            qr_img.height = 150
+    # 构建GitHub图片URL（假设图片在main分支的根目录）
+    github_url = "https://github.com/tudoudaren/jiafei/blob/main/taobao_qr.jpg"
+    
+    # 下载图片到临时文件
+    with NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_file:
+        response = requests.get(github_url, timeout=10)
+        response.raise_for_status()  # 检查HTTP错误
+        tmp_file.write(response.content)
+        tmp_path = tmp_file.name
 
-            # 定位到统计表右侧（仅修改行号）
-            anchor_cell = f"{get_column_letter(start_col + 3)}2"  # 行号从1改为2
+    # 加载图片并调整尺寸
+    qr_img = xlImage(tmp_path)
+    qr_img.width = 150
+    qr_img.height = 150
 
-            # 先添加文字到第一行（原第二行改为第一行）
-            ws[f"{get_column_letter(start_col + 3)}1"] = "扫码关注加飞积木淘宝店铺，可批量采购或定制"  # 行号2→1
+    # 定位到统计表右侧
+    anchor_col = get_column_letter(start_col + 3)
+    
+    # 添加文字到第一行
+    ws[f"{anchor_col}1"] = "淘宝店铺扫码"
+    ws[f"{anchor_col}1"].font = Font(bold=True, color="FF4500")
+    
+    # 插入图片到第二行
+    ws.add_image(qr_img, f"{anchor_col}2")
+    
+    # 设置行高确保显示
+    ws.row_dimensions[2].height = 120  # 调整第二行高度
 
-            # 再插入图片到第二行
-            ws.add_image(qr_img, anchor_cell)
-
-        except Exception as e:
-            print(f"二维码插入失败: {str(e)}")
+except requests.exceptions.RequestException as e:
+    st.error(f"二维码下载失败: {str(e)}")
+    print(f"网络请求异常: {str(e)}")
+except Exception as e:
+    st.error(f"二维码插入失败: {str(e)}")
+    print(f"二维码处理异常: {str(e)}")
+finally:
+    # 清理临时文件
+    if 'tmp_path' in locals() and os.path.exists(tmp_path):
+        os.remove(tmp_path)
 # ========================
 # Streamlit界面
 # ========================
