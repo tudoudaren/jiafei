@@ -262,7 +262,7 @@ def add_statistics(ws, width, color_stats, preset_colors):
             anchor_cell = f"{get_column_letter(start_col + 3)}2"  # 行号从1改为2
 
             # 先添加文字到第一行（原第二行改为第一行）
-            ws[f"{get_column_letter(start_col + 3)}1"] = "扫码淘宝店铺，或关注小红书“加飞积木”可批量采购或定制"  # 行号2→1
+            ws[f"{get_column_letter(start_col + 3)}1"] = "扫码关注加飞积木淘宝店铺，可批量采购或定制"  # 行号2→1
 
             # 再插入图片到第二行
             ws.add_image(qr_img, anchor_cell)
@@ -287,7 +287,7 @@ def main():
     with col2:
         qr_image = Image.open("taobao_qr.jpg")  # 确保图片文件在项目目录下
         st.image(qr_image,
-                caption="扫码进入淘宝店铺“加飞积木”可定制或批量采购",
+                caption="扫码淘宝店铺，或小红书关注“加飞积木”，可定制或批量采购",
                 width=200,
                 use_container_width=False)  # 已更新参数
 
