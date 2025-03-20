@@ -249,26 +249,22 @@ def add_statistics(ws, width, color_stats, preset_colors):
         # 数量单元格
         ws.cell(row=row, column=start_col + 1, value=count)
 
-        # 添加二维码（新增部分）
-        try:
-            from openpyxl.drawing.image import Image as xlImage
-            import requests
-            from io import BytesIO
+    # 添加店铺信息（修改后部分）
+    try:
+        info_col = start_col + 3  # 右侧间隔两列
 
-            # 修改此行（原qr_img = xlImage('taobao_qr.jpg')）
-            # 使用GitHub raw地址直接加载图片
-            response = requests.get("https://raw.githubusercontent.com/tudoudaren/jiafei/main/taobao_qr.jpg")
-            qr_img = xlImage(BytesIO(response.content))  # 直接读取字节流
+        # 第二行：店铺名称
+        ws.cell(row=8, column=info_col, value='用积木搭建成年人的乌托邦，“加飞积木"可定制或批量采购')
 
-            # 以下代码保持完全不变
-            qr_img.width = 150
-            qr_img.height = 150
-            anchor_cell = f"{get_column_letter(start_col + 3)}2"
-            ws[f"{get_column_letter(start_col + 3)}1"] = "扫码淘宝店铺，或小红书关注“加飞积木”，可定制或批量采购"
-            ws.add_image(qr_img, anchor_cell)
+        # 第三行：店铺链接
+        ws.cell(row=9, column=info_col, value="淘宝店铺：https://shop251117556.taobao.com")
 
-        except Exception as e:
-            print(f"二维码插入失败: {str(e)}")
+        # 设置列宽（确保内容可见）
+        ws.column_dimensions[get_column_letter(info_col)].width = 35  # 约10个汉字宽度
+
+    except Exception as e:
+        print(f"店铺信息添加失败: {str(e)}")
+
 # ========================
 # Streamlit界面
 # ========================
@@ -285,14 +281,34 @@ def main():
         st.title("🧱图片转excel像素画-“加飞积木”制作")
         st.markdown("淘宝小红书关注“加飞积木”，B站关注“某山楂”")
     with col2:
-        qr_image = Image.open("taobao_qr.jpg")  # 确保图片文件在项目目录下
-        st.image(qr_image,
-                 caption="扫码关注“加飞积木”淘宝店铺，可定制或批量采购",
-                 width=200,
-                 use_container_width=False)  # 已更新参数
+        try:
+            # 从GitHub加载二维码
+            import requests
+            from io import BytesIO
+
+            # 使用raw.githubusercontent地址
+            response = requests.get(
+                "https://github.com/tudoudaren/jiafei/blob/main/taobao_qr.jpg",
+                timeout=5
+            )
+            response.raise_for_status()  # 检查HTTP状态码
+
+            qr_image = Image.open(BytesIO(response.content))
+            st.image(
+                qr_image,
+                caption="扫码关注“加飞积木”淘宝店铺，可定制或批量采购",
+                width=200,
+                use_container_width=False
+            )
+        except Exception as e:
+            # 显示备用文字
+            st.error("用积木搭建成年人的乌托邦")
+            st.markdown("""
+            **淘宝店铺直达**  
+            [👉 加飞积木官方店铺 👈](https://shop251117556.taobao.com/)
+            """)
 
     st.markdown("---")
-
     # 文件上传
     uploaded_file = st.file_uploader("1、点击Browse files上传图片", type=["jpg", "jpeg", "png"])
     if not uploaded_file:
