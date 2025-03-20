@@ -6,6 +6,7 @@ from openpyxl.utils import get_column_letter
 import math
 import io
 from functools import lru_cache
+from datetime import datetime
 
 # ========================
 # 常量定义
@@ -289,7 +290,7 @@ def main():
             # 使用raw.githubusercontent地址
             response = requests.get(
                 "https://github.com/tudoudaren/jiafei/blob/main/taobao_qr.jpg",
-                timeout=5
+                timeout=2
             )
             response.raise_for_status()  # 检查HTTP状态码
 
@@ -371,7 +372,6 @@ def main():
 
             except Exception as e:
                 st.error(f"处理失败: {str(e)}")
-
 
 if __name__ == "__main__":
     main()
