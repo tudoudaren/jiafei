@@ -13,7 +13,7 @@ from datetime import datetime
 # ========================
 COLOR_DICT = {
     "#F9F9F2": 1,
-    "#000000": 2,
+    "#111111": 2,
     "#FFA44B": 3,
     "#FDA51B": 4,
     "#FFC8B7": 6,
